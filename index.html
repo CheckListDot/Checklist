@@ -93,7 +93,252 @@
         // ---------------------------------------------------------\par
         // CONFIGURATION: APNA CSV LINK YAHAN DALEIN\par
         // ---------------------------------------------------------\par
-        const sheetURL = "APKA_PUBLISHED_CSV_LINK_YAHAN_PASTE_KAREIN";\par
+        const sheetURL = "<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist | Curated Essentials</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
+        .flipkart-blue { background-color: #2874f0; }
+        .flipkart-text { color: #2874f0; }
+        .cart-sidebar { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card:hover img { transform: scale(1.05); }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #000; }
+    </style>
+</head>
+<body class="bg-white text-black">
+
+    <nav class="border-b border-gray-100 py-4 px-6 sticky top-0 bg-white z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black tracking-tighter uppercase cursor-pointer" onclick="location.reload()">Checklist</h1>
+            
+            <div class="hidden md:flex flex-1 mx-12">
+                <input type="text" id="searchInput" placeholder="Search your next essential..." 
+                class="w-full bg-gray-50 border-none rounded-sm py-2 px-4 focus:ring-1 focus:ring-black outline-none text-sm transition-all">
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div id="userSection" class="text-xs font-bold uppercase border-b-2 border-black cursor-pointer pb-1" onclick="toggleLogin()">
+                    Login
+                </div>
+                <button onclick="toggleCart()" class="relative">
+                    <i class="fa-solid fa-bag-shopping text-xl"></i>
+                    <span id="cartCount" class="absolute -top-2 -right-2 flipkart-blue text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="py-16 text-center border-b border-gray-50">
+        <h2 class="text-5xl md:text-7xl font-black mb-4 tracking-tighter uppercase">Essentials Only.</h2>
+        <p class="text-gray-400 uppercase tracking-[0.3em] text-[10px] font-bold">Curated Deals for Your Lifestyle</p>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6 min-h-screen">
+        <div id="loader" class="text-center py-20 text-xs font-bold uppercase tracking-widest animate-pulse">Fetching Checklist...</div>
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+            </div>
+    </main>
+
+    <footer class="bg-black text-white py-10 mt-20 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-widest font-bold">
+            <p>© 2024 Checklist Inc.</p>
+            <div class="flex gap-8">
+                <a href="#" class="hover:text-gray-400">Instagram</a>
+                <a href="#" class="hover:text-gray-400">Telegram</a>
+                <a href="#" class="hover:text-gray-400">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <div id="cartSidebar" class="cart-sidebar fixed right-0 top-0 h-full w-full md:w-[400px] bg-white shadow-2xl transform translate-x-full z-[60] flex flex-col">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h2 class="text-xl font-black uppercase tracking-tight italic">The List</h2>
+            <button onclick="toggleCart()" class="text-3xl font-light">&times;</button>
+        </div>
+        <div id="cartItems" class="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50">
+            </div>
+        <div class="p-6 border-t bg-white">
+            <button onclick="checkout()" class="w-full flipkart-blue text-white py-5 font-black uppercase tracking-[0.2em] text-xs hover:opacity-90 transition shadow-lg">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-95 z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white p-10 max-w-sm w-full rounded-none">
+            <h2 class="text-3xl font-black mb-2 uppercase italic tracking-tighter">Account.</h2>
+            <p class="text-gray-400 text-[10px] uppercase mb-8 font-bold tracking-widest">Enter your name to personalize</p>
+            <input type="text" id="userNameInput" placeholder="YOUR NAME" class="w-full border-b-2 border-black p-3 mb-8 outline-none text-sm font-bold uppercase tracking-widest">
+            <button onclick="doLogin()" class="w-full bg-black text-white py-4 font-black uppercase text-xs tracking-widest hover:bg-gray-800 transition">Create Identity</button>
+            <button onclick="toggleLogin()" class="w-full mt-4 text-[10px] uppercase font-bold text-gray-400">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // ---------------------------------------------------------
+        // CONFIGURATION: APNA CSV LINK YAHAN DALEIN
+        // ---------------------------------------------------------
+        const sheetURL = "APKA_PUBLISHED_CSV_LINK_YAHAN_PASTE_KAREIN";
+
+        let products = [];
+        let cart = JSON.parse(localStorage.getItem('checklist_cart')) || [];
+        let currentUser = localStorage.getItem('checklist_user') || null;
+
+        // 1. DATA FETCHING (GOOGLE SHEETS)
+        async function loadData() {
+            try {
+                const response = await fetch(sheetURL);
+                const data = await response.text();
+                const rows = data.split('\n').slice(1);
+                
+                products = rows.map(row => {
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if (cols.length < 5) return null;
+                    return {
+                        id: cols[0].replace(/"/g, "").trim(),
+                        name: cols[1].replace(/"/g, "").trim(),
+                        price: cols[2].replace(/"/g, "").trim(),
+                        img: cols[3].replace(/"/g, "").trim(),
+                        store: cols[4].replace(/"/g, "").trim(),
+                        link: cols[5].replace(/"/g, "").trim()
+                    };
+                }).filter(p => p !== null);
+
+                document.getElementById('loader').style.display = 'none';
+                displayProducts(products);
+            } catch (error) {
+                document.getElementById('loader').innerText = "Error: Check your Sheet URL and ensure it's Published.";
+            }
+        }
+
+        // 2. DISPLAY PRODUCTS
+        function displayProducts(items) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = items.map(p => `
+                <div class="product-card group cursor-pointer border border-gray-50 p-3 hover:border-black transition-all">
+                    <div class="relative overflow-hidden bg-gray-100 aspect-[3/4] mb-4">
+                        <img src="${p.img}" class="w-full h-full object-cover transition duration-700 grayscale hover:grayscale-0" onerror="this.src='https://via.placeholder.com/400x500?text=Checklist'">
+                        <button onclick="addToCart('${p.id}')" class="absolute bottom-0 left-0 w-full bg-black text-white py-4 translate-y-full group-hover:translate-y-0 transition duration-300 text-[10px] font-black uppercase tracking-widest">Add To List</button>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div class="max-w-[70%]">
+                            <h3 class="text-[11px] font-black uppercase tracking-tight leading-none mb-1">${p.name}</h3>
+                            <p class="text-[9px] font-bold uppercase tracking-widest flipkart-text">${p.store}</p>
+                        </div>
+                        <p class="text-sm font-black italic tracking-tighter">${p.price}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 3. CART SYSTEM
+        function addToCart(id) {
+            const product = products.find(p => p.id == id);
+            cart.push(product);
+            saveCart();
+            updateCartUI();
+            toggleCart(true);
+        }
+
+        function saveCart() { localStorage.setItem('checklist_cart', JSON.stringify(cart)); }
+
+        function updateCartUI() {
+            document.getElementById('cartCount').innerText = cart.length;
+            const cartItemsContainer = document.getElementById('cartItems');
+            if(cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center mt-20">Your list is empty.</p>';
+                return;
+            }
+            cartItemsContainer.innerHTML = cart.map((item, index) => `
+                <div class="flex gap-4 items-center bg-white p-3 border-l-4 border-black shadow-sm">
+                    <img src="${item.img}" class="w-12 h-16 object-cover grayscale">
+                    <div class="flex-1">
+                        <h4 class="text-[10px] font-black uppercase leading-tight">${item.name}</h4>
+                        <p class="text-[8px] text-gray-400 uppercase font-bold mt-1">${item.store}</p>
+                        <p class="text-xs font-black mt-1 italic">${item.price}</p>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="text-gray-300 hover:text-black transition text-xl">&times;</button>
+                </div>
+            `).join('');
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveCart();
+            updateCartUI();
+        }
+
+        function toggleCart(show) {
+            const sidebar = document.getElementById('cartSidebar');
+            if(show === true) sidebar.classList.remove('translate-x-full');
+            else if(show === false) sidebar.classList.add('translate-x-full');
+            else sidebar.classList.toggle('translate-x-full');
+        }
+
+        // 4. CHECKOUT (SPLIT LOGIC)
+        function checkout() {
+            if(cart.length === 0) return;
+            const groups = cart.reduce((acc, item) => {
+                if (!acc[item.store]) acc[item.store] = [];
+                acc[item.store].push(item);
+                return acc;
+            }, {});
+
+            let modalHTML = `
+                <div id="splitModal" class="fixed inset-0 bg-black bg-opacity-95 z-[100] flex items-center justify-center p-6">
+                    <div class="bg-white max-w-sm w-full p-10 rounded-none shadow-2xl">
+                        <h2 class="text-2xl font-black uppercase mb-2 italic tracking-tighter">The Path.</h2>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-8 leading-relaxed">Multiple stores detected. Click each to secure your items.</p>
+                        <div class="space-y-4">
+                            ${Object.keys(groups).map(store => `
+                                <button onclick="window.open('${groups[store][0].link}', '_blank')" 
+                                class="w-full border-2 border-black py-4 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition shadow-sm">
+                                    Secure on ${store} (${groups[store].length} Items)
+                                </button>
+                            `).join('')}
+                        </div>
+                        <button onclick="document.getElementById('splitModal').remove()" class="mt-8 w-full text-[9px] uppercase font-bold text-gray-300 tracking-[0.2em]">Go Back</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        // 5. SEARCH & LOGIN
+        function toggleLogin() {
+            if(currentUser) { if(confirm("End current session?")) { localStorage.removeItem('checklist_user'); location.reload(); } }
+            else { document.getElementById('loginModal').classList.toggle('hidden'); }
+        }
+
+        function doLogin() {
+            const name = document.getElementById('userNameInput').value;
+            if(name) { localStorage.setItem('checklist_user', name); location.reload(); }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(term) || p.store.toLowerCase().includes(term));
+            displayProducts(filtered);
+        });
+
+        // 6. INITIALIZE
+        window.onload = () => {
+            loadData();
+            if(currentUser) document.getElementById('userSection').innerText = `ID: ${currentUser}`;
+            updateCartUI();
+        };
+    </script>
+</body>
+</html>
+";\par
 \par
         let products = [];\par
         let cart = JSON.parse(localStorage.getItem('checklist_cart')) || [];\par
